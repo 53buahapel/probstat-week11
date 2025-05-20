@@ -1,8 +1,11 @@
 # 📊 Assignment on Statistical Analysis and Linear Modeling
 
-**Dataset**: Room Occupancy Estimation
+**Dataset**: Room Occupancy Estimation 
+
 **Course**: Probability and Statistics
+
 **Department**: Computer Engineering, UNDIP
+
 **Date**: May 7, 2025
 
 ---
