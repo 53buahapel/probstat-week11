@@ -137,6 +137,3 @@ For each question, conclude with:
 * Visual support (plots)
 * Limitations if any
 
----
-
-Let me know if you'd like this as a `.md` file or embedded into your Jupyter notebook too!
