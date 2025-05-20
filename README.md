@@ -1,7 +1,3 @@
-Here's the assignment rewritten in clean **Markdown (MD)** format for use in your Jupyter notebook or report.
-
----
-
 # 📊 Assignment on Statistical Analysis and Linear Modeling
 
 **Dataset**: Room Occupancy Estimation
