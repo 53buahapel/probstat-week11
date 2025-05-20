@@ -1,194 +1,143 @@
-## Question 1: Proportion Test for Sound Spikes
-
-**Goal:** 95% CI for $p=\Pr[S1\_Sound>1]$, test $H_0:p=0.025$.
-
-1. **Count spikes**:
-
-   ```python
-   spikes = (df["S1_Sound"] > 1).sum()
-   n = len(df)
-   p̂ = spikes / n
-   ```
-2. **Check normal approx**: ensure $n p_0\ge10$ and $n(1-p_0)\ge10$.
-3. **95% CI** (Wald):
-
-   $$
-     \hat p \pm z_{0.975} \sqrt{\frac{\hat p(1-\hat p)}{n}}
-   $$
-4. **Z-test**:
-
-   $$
-     z = \frac{\hat p - 0.025}{\sqrt{0.025\,(1-0.025)/n}},\quad
-     p\text{-value}=2(1-\Phi(|z|))
-   $$
-
-### Interpretation
-
-* If $p$-value < 0.05, conclude $p\neq0.025$.
-* Report CI, e.g. “We estimate $p=…$ with 95% CI $[…,…]$.”
-* Confirm normal-approx holds (both $np_0$ and $n(1-p_0)\ge10$).
+Here's the assignment rewritten in clean **Markdown (MD)** format for use in your Jupyter notebook or report.
 
 ---
 
-## Question 2: One-Sample Mean Test for Temperature
+# 📊 Assignment on Statistical Analysis and Linear Modeling
 
-**Goal:** Is $\mu_{\rm temp}=25$°C?
-
-1. **Compute sample mean & std**:
-
-   ```python
-   x̄ = df["S2_Temp"].mean()
-   s = df["S2_Temp"].std(ddof=1)
-   n = len(df)
-   ```
-2. **t-statistic**:
-
-   $$
-     t = \frac{x̄ - 25}{s/\sqrt{n}},\quad \text{df}=n-1
-   $$
-3. **p-value**: two-sided from Student’s t.
-4. **95% CI**:
-
-   $$
-     x̄ \pm t_{0.975,\,n-1}\,\frac{s}{\sqrt{n}}
-   $$
-
-### Interpretation
-
-* If $p<0.05$, mean differs from 25 °C.
-* State CI, e.g. “95% CI for μ is \[…,…]°C.”
+**Dataset**: Room Occupancy Estimation
+**Course**: Probability and Statistics
+**Department**: Computer Engineering, UNDIP
+**Date**: May 7, 2025
 
 ---
 
-## Question 3: Correlation Occupancy ↔ CO₂
+## 🧩 Introduction
 
-**Goal:** Pearson $r$ and significance.
+This assignment involves analyzing the [Room Occupancy Estimation Dataset](https://www.kaggle.com/datasets/ananthr1/room-occupancy-estimation-data-set) using various statistical techniques:
 
-1. **Pearson**:
+* Hypothesis testing
+* Interval estimation
+* Correlation analysis
+* Regression modeling
 
-   ```python
-   from scipy.stats import pearsonr
-   r, p = pearsonr(df["Room_Occupancy_Count"], df["S5_CO2"])
-   ```
-2. **Scatterplot**:
-
-   ```python
-   plt.scatter(df["Room_Occupancy_Count"], df["S5_CO2"])
-   plt.xlabel("Occupancy"); plt.ylabel("CO2")
-   ```
-
-### Interpretation
-
-* Report “$r=…$, $p$-value=…; indicates \[weak/moderate/strong] \[positive/negative] correlation.”
-* Show scatter to visualize linear trend.
+You will examine if observed sensor measures differ from expected values and explore predictors for environmental factors like **CO₂ levels** and **occupant counts**.
 
 ---
 
-## Question 4: Correlation Ambient Temp ↔ CO₂ & CO₂ Slope
+## 🔍 Research Questions and Instructions
 
-**Goal:** AvgTemp vs. S5\_CO2 and vs. S5\_CO2\_Slope.
+### **Question 1: Proportion Test for Sound Spikes**
 
-1. **Compute avg\_temp**:
+**Research Question:**
+What is the 95% confidence interval for the proportion of intervals with a sound spike (`S1_Sound > 1`)?
+Is the observed proportion significantly different from the hypothesized value of 2.5%?
 
-   ```python
-   temps = df[["S1_Temp","S2_Temp","S3_Temp","S4_Temp"]]
-   df["avg_temp"] = temps.mean(axis=1)
-   ```
-2. **Two Pearson tests**:
+**Instructions:**
 
-   ```python
-   r1, p1 = pearsonr(df["avg_temp"], df["S5_CO2"])
-   r2, p2 = pearsonr(df["avg_temp"], df["S5_CO2_Slope"])
-   ```
-3. (Optional) two small scatterplots.
+* Define a sound spike as any interval where `S1_Sound > 1`.
+* Calculate the sample proportion.
+* Check if both $np_0$ and $n(1−p_0)$ are at least 10.
+* Compute the 95% confidence interval.
+* Test the hypothesis:
 
-### Interpretation
-
-* “Avg temp correlates with CO₂ at $r_1=…$ ($p_1=…$); with CO₂ slope at $r_2=…$ ($p_2=…$).”
+  $$
+  H_0: p = 0.025 \quad vs. \quad H_1: p \ne 0.025
+  $$
 
 ---
 
-## Question 5: OLS Regression for CO₂ Prediction
+### **Question 2: One-Sample Mean Test for Room Temperature**
 
-**Goal:** Predict S5\_CO2 from temps, lights, and occupancy.
+**Research Question:**
+Is the mean room temperature (`S2_Temp`) significantly different from the target value of 25°C?
 
-1. **Select predictors**:
+**Instructions:**
 
-   ```python
-   X = df[["S1_Temp","S2_Temp","S3_Temp","S4_Temp",
-           "S1_Light","S2_Light","S3_Light","S4_Light",
-           "Room_Occupancy_Count"]]
-   y = df["S5_CO2"]
-   ```
-
-2. **Fit OLS** (statsmodels):
-
-   ```python
-   import statsmodels.api as sm
-   X2 = sm.add_constant(X)
-   model = sm.OLS(y, X2).fit()
-   print(model.summary())
-   ```
-
-3. **Key outputs**:
-
-   * **R²**: overall fit
-   * **Coefficients** with p-values
-
-4. **Pred vs. Actual plot**:
-
-   ```python
-   ŷ = model.predict(X2)
-   plt.scatter(y, ŷ); plt.xlabel("Actual CO2"); plt.ylabel("Predicted CO2")
-   ```
-
-### Interpretation
-
-* Highlight the largest significant predictors (e.g. “each +1 °C in S2\_Temp ↦ +0.8 ppm CO₂, $p<0.01$”).
-* Comment on R²: “Model explains \~X% of CO₂ variability.”
+* Perform a one-sample t-test comparing the mean of `S2_Temp` to 25.
+* Compute and interpret the 95% confidence interval.
 
 ---
 
-## Question 6: OLS Regression for Occupancy Prediction
+### **Question 3: Correlation Between Occupancy and CO₂ Levels**
 
-**Goal:** Predict Room\_Occupancy\_Count from aggregates & sensors.
+**Research Question:**
+Is there a significant correlation between `Room_Occupancy_Count` and `S5_CO2`?
 
-### 20% Steps
+**Instructions:**
 
-1. **Compute aggregates**:
-
-   ```python
-   df["avg_light"] = df[["S1_Light","S2_Light","S3_Light","S4_Light"]].mean(1)
-   df["avg_sound"] = df[["S1_Sound","S2_Sound","S3_Sound","S4_Sound"]].mean(1)
-   ```
-2. **Fit OLS**:
-
-   ```python
-   X = df[["avg_temp","avg_light","avg_sound","S5_CO2","S6_PIR","S7_PIR"]]
-   X2 = sm.add_constant(X)
-   occ_model = sm.OLS(df["Room_Occupancy_Count"], X2).fit()
-   print(occ_model.summary())
-   ```
-3. **Inspect**:
-
-   * Significant predictors
-   * R²
-   * Warning if occupancy has low variance
-
-### Interpretation
-
-* Note which environmental factors best predict occupancy.
-* If R² low or only one strong predictor, discuss “limited variation in occupancy counts may weaken model.”
+* Calculate the **Pearson correlation coefficient** and its p-value.
+* Plot a **scatterplot** between occupancy and CO₂.
 
 ---
 
-## Putting It All Together
+### **Question 4: Correlation with Ambient Temperature**
 
-When you write up your report, emphasize:
+**Research Question:**
+Do higher **ambient temperatures** (average of `S1_Temp` to `S4_Temp`) correlate with:
 
-* **Q1**: “Observed spike rate = … (95% CI: \[…,…]); normal approx OK; $p$-value=… → \[not] different from 2.5%.”
-* **Q2**: “Mean = …°C (95% CI: \[…,…]); $t$-statistic=…, $p$=… → \[no] evidence mean ≠ 25°C.”
-* **Q3–4**: Correlation coefficients with brief interpretation.
-* **Q5**: R² and top 2–3 predictors—plot actual vs. predicted.
-* **Q6**: R², significant predictors, note any occupancy data limitations.
+* Higher **CO₂ concentration** (`S5_CO2`)?
+* Steeper **CO₂ slope** (`S5_CO2_Slope`)?
 
+**Instructions:**
+
+* Calculate `avg_temp` from the four sensors.
+* Compute Pearson correlations between:
+
+  * `avg_temp` and `S5_CO2`
+  * `avg_temp` and `S5_CO2_Slope`
+
+---
+
+### **Question 5: Regression Model for CO₂ Prediction**
+
+**Research Question:**
+Can CO₂ concentration (`S5_CO2`) be predicted using:
+
+* Temperature (`S1_Temp`–`S4_Temp`)
+* Light (`S1_Light`–`S4_Light`)
+* Room occupancy count?
+
+**Instructions:**
+
+* Build an OLS regression model using the listed predictors.
+* Evaluate:
+
+  * **R-squared**
+  * **F-statistic**
+  * **Coefficient p-values**
+* Plot **actual vs. predicted** CO₂.
+
+---
+
+### **Question 6: Regression Model for Occupancy Prediction**
+
+**Research Question:**
+Can `Room_Occupancy_Count` be predicted using other sensor readings?
+
+**Instructions:**
+
+* Create aggregated features:
+
+  * `avg_temp` (S1–S4)
+  * `avg_light` (S1–S4)
+  * `avg_sound` (S1–S4)
+* Use predictors:
+  `avg_temp`, `avg_light`, `avg_sound`, `S5_CO2`, `S6_PIR`, `S7_PIR`
+* Fit an OLS regression to predict `Room_Occupancy_Count`.
+* Interpret results and note any **limitations** (e.g., low occupancy variance).
+
+---
+
+## ✅ Conclusion Guidelines
+
+For each question, conclude with:
+
+* Significance of test or model
+* Confidence intervals and interpretations
+* Important variables
+* Visual support (plots)
+* Limitations if any
+
+---
+
+Let me know if you'd like this as a `.md` file or embedded into your Jupyter notebook too!
